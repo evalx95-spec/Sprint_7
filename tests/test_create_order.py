@@ -34,10 +34,7 @@ class TestCreateOrder:
     
     @allure.title('Проверка, что можно не указывать цвет')
     def test_create_order_no_color(self):
-        order_data = generate_order_data()
-        if 'color' in order_data:
-            del order_data['color']
-        
+        order_data = generate_order_data_without_color()
         response = requests.post(f'{Urls.BASE_URL+Urls.ORDERS}', json=order_data)
         
         assert response.status_code == 201

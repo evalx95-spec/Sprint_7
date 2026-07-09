@@ -37,3 +37,23 @@ def generate_order_data(color=None):
         data["color"] = color if isinstance(color, list) else [color]
 
     return data
+
+@allure.step('Генерация данных заказа без указания цвета')
+def generate_order_data_without_color():
+    """Генерирует данные заказа без поля color"""
+    first_names = ["Иван", "Петр", "Алексей", "Анна", "Кристина"]
+    last_names = ["Иванов", "Петров", "Сидоров", "Трофимова", "Аветова"]
+    addresses = ["ул. Гагарина 1", "Бр. Захаровых 8", "ул. Красная Звезда 94"]
+
+    data = {
+        "firstName": random.choice(first_names),
+        "lastName": random.choice(last_names),
+        "address": random.choice(addresses),
+        "metroStation": random.randint(1, 20),
+        "phone": f"+7{random.randint(9000000000, 9999999999)}",
+        "rentTime": random.randint(1, 7),
+        "deliveryDate": "2026-07-08",
+        "comment": "Тестовый заказ"
+    }
+
+    return data
