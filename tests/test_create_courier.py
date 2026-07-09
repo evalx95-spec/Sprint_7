@@ -12,14 +12,13 @@ class TestCreateCourier:
 
     @allure.title('Проверка успешного создания курьера')
     def test_create_courier_success(self, create_and_delete_courier):
-        """Проверяет, что курьер успешно создается через фикстуру"""
-        # Фикстура create_and_delete_courier уже создала курьера
-        # Проверяем, что данные курьера корректны
+        
+        
         assert 'login' in create_and_delete_courier
         assert 'password' in create_and_delete_courier
         assert 'firstName' in create_and_delete_courier
         
-        # Можно также проверить, что курьер действительно существует
+        
         auth_response = requests.post(
             f'{Urls.BASE_URL}{Urls.LOGIN}',
             data={
@@ -32,7 +31,7 @@ class TestCreateCourier:
 
     @allure.title('Проверка ошибки при создании курьера с существующим логином')
     def test_create_duplicate_courier(self, existing_courier):
-        """Проверяет ошибку при попытке создать курьера с уже занятым логином"""
+        
         payload = {
             "login": existing_courier['login'],
             "password": generate_random_string(10),
@@ -51,7 +50,7 @@ class TestCreateCourier:
     @allure.title('Проверка ошибки при отсутствии обязательных полей')
     @pytest.mark.parametrize('missing_field', ['login', 'password'])
     def test_create_courier_missing_fields(self, missing_field):
-        """Проверяет ошибку при отсутствии обязательных полей"""
+        
         payload = generate_courier_payload()
         del payload[missing_field]
 

@@ -7,7 +7,7 @@ from ..urls import Urls
 
 @pytest.fixture(scope='function')
 def create_and_delete_courier():
-    """Создает курьера и возвращает его данные, удаляет после теста"""
+    
     login, password, first_name = generate_courier_data()
     payload = {
         "login": login,
@@ -25,7 +25,6 @@ def create_and_delete_courier():
     
     yield courier_data
     
-    # Удаление курьера после теста
     auth_response = requests.post(
         f'{Urls.BASE_URL}{Urls.LOGIN}',
         data={"login": login, "password": password}
@@ -38,13 +37,13 @@ def create_and_delete_courier():
 
 @pytest.fixture(scope='function')
 def created_courier(create_and_delete_courier):
-    """Фикстура, возвращающая данные созданного курьера"""
+
     return create_and_delete_courier
 
 
 @pytest.fixture(scope='function')
 def existing_courier():
-    """Создает курьера для тестов с проверкой существующих данных"""
+   
     login, password, first_name = generate_courier_data()
     payload = {
         "login": login,
@@ -56,7 +55,7 @@ def existing_courier():
     
     yield {"login": login, "password": password, "first_name": first_name}
     
-    # Удаление курьера после теста
+    
     auth_response = requests.post(
         f'{Urls.BASE_URL}{Urls.LOGIN}',
         data={"login": login, "password": password}
