@@ -52,20 +52,18 @@ def login_courier_and_get_id(login, password):
         return response.json().get('id')
     return None
 
-@allure.step('Удаление курьера')
-def delete_courier(login, password):
-    
-    courier_id = login_courier_and_get_id(login, password)
+@allure.step('Удаление курьера по ID')
+def delete_courier_by_id(courier_id):
     if courier_id:
-        response = requests.delete(f'{Urls.BASE_URL+Urls.COURIER}/{courier_id}')
+        response = requests.delete(f'{Urls.BASE_URL}{Urls.COURIER}/{courier_id}')
         return response.status_code == 200
     return False
-
-@allure.step('Отмена заказа по треку track')
-def cancel_order(track):
-    
-    response = requests.put(
-        f'{Urls.BASE_URL+Urls.CANCEL}',
-        json={"track": track}
-    )
-    return response
+@allure.step('Удаление заказа по номеру трека')
+def cancel_order(track_number):
+    if track_number:
+        response = requests.put(
+            f'{Urls.BASE_URL}{Urls.ORDERS}/cancel',
+            json={"trackId": track_number}
+        )
+        return response.status_code == 200
+    return False

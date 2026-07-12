@@ -11,46 +11,77 @@ from ..urls import Urls
 class TestCreateCourier:
 
     @allure.title('Проверка успешного создания курьера')
-    def test_create_courier_success(self, create_and_delete_courier):
+    def test_create_courier_success(self):
+        login, password, first_name = generate_courier_data()
+        payload = {
+            "login": login,
+            "password": password,
+            "firstName": first_name
+        }
         
+        with allure.step('Отправка запроса на создание курьера'):
+            response = requests.post(f'{Urls.BASE_URL}{Urls.COURIER}', data=payload)
         
-        assert 'login' in create_and_delete_courier
-        assert 'password' in create_and_delete_courier
-        assert 'firstName' in create_and_delete_courier
+        with allure.step('Проверка успешного создания'):
+            assert response.status_code == 201
+            response_json = response.json()
+            assert 'ok' in response_json
+            assert response_json['ok'] is True
         
-        
-        auth_response = requests.post(
-            f'{Urls.BASE_URL}{Urls.LOGIN}',
-            data={
-                "login": create_and_delete_courier['login'], 
-                "password": create_and_delete_courier['password']
-            }
-        )
-        assert auth_response.status_code == 200
-        assert 'id' in auth_response.json()
+        with allure.step('Авторизация для получения ID курьера'):
+            auth_response = requests.post(
+                f'{Urls.BASE_URL}{Urls.LOGIN}',
+                data={"login": login, "password": password}
+            )
+            assert auth_response.status_code == 200
+            courier_id = auth_response.json().get('id')
+            
+        if courier_id:
+            delete_courier_by_id(courier_id)
 
     @allure.title('Проверка ошибки при создании курьера с существующим логином')
-    def test_create_duplicate_courier(self, existing_courier):
+    def test_create_duplicate_courier(self):
         
-        payload = {
-            "login": existing_courier['login'],
+        login, password, first_name = generate_courier_data()
+        first_payload = {
+            "login": login,
+            "password": password,
+            "firstName": first_name
+        }
+        
+        with allure.step('Создание первого курьера'):
+            create_response = requests.post(f'{Urls.BASE_URL}{Urls.COURIER}', data=first_payload)
+            assert create_response.status_code == 201
+        
+        second_payload = {
+            "login": login,
             "password": generate_random_string(10),
             "firstName": generate_random_string(10)
         }
         
         with allure.step('Отправка запроса на создание дубликата курьера'):
-            response = requests.post(f'{Urls.BASE_URL}{Urls.COURIER}', data=payload)
-
+            response = requests.post(f'{Urls.BASE_URL}{Urls.COURIER}', data=second_payload)
+        
         with allure.step('Проверка ответа на дубликат'):
             assert response.status_code == 409
             response_json = response.json()
             assert 'message' in response_json 
             assert ERROR_MESSAGES['login_already_exists'] in response_json['message']
+        
+        with allure.step('Авторизация для получения ID курьера'):
+            auth_response = requests.post(
+                f'{Urls.BASE_URL}{Urls.LOGIN}',
+                data={"login": login, "password": password}
+            )
+            assert auth_response.status_code == 200
+            courier_id = auth_response.json().get('id')
+            
+        if courier_id:
+            delete_courier_by_id(courier_id)
 
     @allure.title('Проверка ошибки при отсутствии обязательных полей')
     @pytest.mark.parametrize('missing_field', ['login', 'password'])
     def test_create_courier_missing_fields(self, missing_field):
-        
         payload = generate_courier_payload()
         del payload[missing_field]
 
@@ -62,4 +93,3 @@ class TestCreateCourier:
             response_json = response.json()
             assert 'message' in response_json 
             assert ERROR_MESSAGES['missing_fields'] in response_json['message']
-            
