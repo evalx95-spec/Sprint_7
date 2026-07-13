@@ -13,23 +13,27 @@ def created_courier():
         "password": password,
         "firstName": first_name
     }
+    
     response = requests.post(f'{Urls.BASE_URL}{Urls.COURIER}', data=payload)
-    assert response.status_code == 201, f"Не удалось создать курьера: {response.text}"
     
     courier_data = {
         "login": login,
         "password": password,
-        "firstName": first_name
+        "firstName": first_name,
+        "response": response
     }
     
     yield courier_data
     
-    auth_response = requests.post(
-        f'{Urls.BASE_URL}{Urls.LOGIN}',
-        data={"login": login, "password": password}
-    )
-    if auth_response.status_code == 200:
+    try:
+        
+        auth_response = requests.post(
+            f'{Urls.BASE_URL}{Urls.COURIER_LOGIN}', 
+            data={"login": login, "password": password}
+        )
         courier_id = auth_response.json().get('id')
         if courier_id:
             delete_courier_by_id(courier_id)
+    except Exception:
+        pass  
             
